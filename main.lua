@@ -56,7 +56,7 @@ end
 function love.draw()
     push:apply('start')
 
-    love.graphics.clear(237, 231, 225, 0)
+    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
     
     love.graphics.printf('Welcome to Pong', 0, 20, VIRTUAL_WIDTH, 'center')
 
@@ -66,10 +66,10 @@ function love.draw()
     love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30, VIRTUAL_HEIGHT / 3)
     
     --left paddle
-    love.graphics.rectangle('fill', 10, 30, 5, 20)
+    love.graphics.rectangle('fill', 10, player1Y, 5, 20)
 
     --right paddle
-    love.graphics.rectangle('fill', VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 50, 5, 20)
+    love.graphics.rectangle('fill', VIRTUAL_WIDTH - 10, player2Y, 5, 20)
     
     --ball
     love.graphics.rectangle('fill', VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
