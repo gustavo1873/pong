@@ -10,7 +10,7 @@ WINDOW_HEIGHT = 1080
 VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
 
-PADDLE_SPEED = 500
+PADDLE_SPEED = 300
 
 function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
@@ -43,6 +43,42 @@ function love.load()
 end
 
 function love.update(dt)
+    if gameState == 'play' then
+
+        if ball:collides(player1) then
+            ball.dx = -ball.dx * 1.05
+            ball.x = player1.x + 5
+
+
+            if ball.dy < 0 then
+                ball.dy = -math.random(10, 150)
+            else
+                ball.dy = math.random(10, 150)
+            end
+        end
+        if ball:collides(player2) then
+            ball.dx = -ball.dx * 1.05
+            ball.x = player2.x - 4
+
+            if ball.dy < 0 then
+                ball.dy = -math.random(10, 150)
+            else
+                ball.dy = math.random(10, 150)
+            end
+        end
+
+       --this block detects if the ball hits the top or bottom boundaries of the screen and if so, it reverses the trajectory
+        if ball.y <= 0 then
+            ball.y = 0
+            ball.dy = -ball.dy
+        end
+
+        if ball.y >= VIRTUAL_HEIGHT - 4 then
+            ball.y = VIRTUAL_HEIGHT - 4
+            ball.dy = -ball.dy
+        end
+    end
+
     --player 1 paddle movement
     if love.keyboard.isDown('w') then
         -- negative paddle speed because Y up is negative
