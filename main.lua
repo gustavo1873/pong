@@ -20,7 +20,7 @@ function love.load()
     math.randomseed(os.time())
 
     smallFont = love.graphics.newFont('font.ttf', 8)
-  --  scoreFont= love.graphics.newFont('font.ttf', 32)
+    scoreFont= love.graphics.newFont('font.ttf', 32)
 
     love.graphics.setFont(smallFont)
      
@@ -30,8 +30,10 @@ function love.load()
         vsync = true
     })
 
-   -- player1Score = 0
-   -- player2Score = 0
+    player1Score = 0
+    player2Score = 0
+
+    servingPlayer = 1
 
    -- The numbers between parentheses are the parameters x, y, width, height that were set in the Paddle class
     player1 = Paddle(10, 30, 5, 20)
@@ -43,6 +45,15 @@ function love.load()
 end
 
 function love.update(dt)
+    if gameState == 'serve' then
+        --Ball's velocity changing according to which player scored a point
+        ball.dy = math.random(-50, 50)
+        if servingPlayer == 1 then
+            ball.dx = math.random(140, 200)
+        else
+            ball.dx = -math.random(140, 200)
+        end
+    end
     if gameState == 'play' then
 
         if ball:collides(player1) then
@@ -77,6 +88,20 @@ function love.update(dt)
             ball.y = VIRTUAL_HEIGHT - 4
             ball.dy = -ball.dy
         end
+    end
+
+    if ball.x < 0 then
+        servingPlayer = 1
+        player2Score = player2Score + 1
+        ball:reset()
+        gameState = 'serve'
+    end
+
+    if ball.x > VIRTUAL_WIDTH then
+        servingPlayer = 2
+        player1Score = player1Score + 1
+        ball:reset()
+        gameState = 'serve'
     end
 
     --player 1 paddle movement
@@ -128,15 +153,20 @@ function love.draw()
     love.graphics.setFont(smallFont)
     
     if gameState == 'start' then
+        love.graphics.printf('Pongus', 0, 10, VIRTUAL_WIDTH, 'center')
         love.graphics.printf('Press Enter to start', 0, 20, VIRTUAL_WIDTH, 'center')
+    elseif gameState == 'serve' then
+        love.graphics.setFont(smallFont)
+        love.graphics.printf('Player ' .. tostring(servingPlayer) .. "'s serve!", 0, 10, VIRTUAL_WIDTH, 'center')
+        
     else
         love.graphics.printf('Play Pong!', 0, 20, VIRTUAL_WIDTH, 'center' )
     end
     
-   -- love.graphics.setFont(scoreFont)
+    love.graphics.setFont(scoreFont)
 
-   -- love.graphics.print(tostring(player1Score), VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 3)
-   --love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30, VIRTUAL_HEIGHT / 3)
+    love.graphics.print(tostring(player1Score), VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 3)
+    love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30, VIRTUAL_HEIGHT / 3)
     
     --left paddle
     player1:render()
@@ -150,8 +180,16 @@ function love.draw()
     push:apply('end')
 end
 
-    function showFPS()
+function showFPS()
         love.graphics.setFont(smallFont)
         love.graphics.setColor(0, 255, 0, 255)
         love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 10, 10)
-    end
+end
+
+function displayScore()
+        love.graphics.setFont(scoreFont)
+        love.graphics.print(tostring(player1Score), VIRTUAL_WIDTH / 2 - 50, 
+            VIRTUAL_HEIGHT / 3)
+        love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30,
+            VIRTUAL_HEIGHT / 3)
+end
