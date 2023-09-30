@@ -20,13 +20,14 @@ function love.load()
     math.randomseed(os.time())
 
     smallFont = love.graphics.newFont('font.ttf', 8)
+    largeFont = love.graphics.newFont('font.ttf', 16)
     scoreFont= love.graphics.newFont('font.ttf', 32)
 
     love.graphics.setFont(smallFont)
      
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
-        resizable = true,
+        resizable = false,
         vsync = true
     })
 
@@ -53,8 +54,7 @@ function love.update(dt)
         else
             ball.dx = -math.random(140, 200)
         end
-    end
-    if gameState == 'play' then
+    elseif gameState == 'play' then
 
         if ball:collides(player1) then
             ball.dx = -ball.dx * 1.05
@@ -88,32 +88,42 @@ function love.update(dt)
             ball.y = VIRTUAL_HEIGHT - 4
             ball.dy = -ball.dy
         end
-    end
 
-    if ball.x < 0 then
-        servingPlayer = 1
-        player2Score = player2Score + 1
-        ball:reset()
-        gameState = 'serve'
-    end
 
-    if ball.x > VIRTUAL_WIDTH then
-        servingPlayer = 2
-        player1Score = player1Score + 1
-        ball:reset()
-        gameState = 'serve'
+        if ball.x < 0 then
+            servingPlayer = 1
+            player2Score = player2Score + 1
+            if player2Score == 5 then
+                winningPlayer = 2
+                gameState = 'done'
+            else      
+                gameState = 'serve'
+                ball:reset()
+            end
+        end
+   
+        if ball.x > VIRTUAL_WIDTH then
+            servingPlayer = 2
+            player1Score = player1Score + 1
+            if player1Score == 5 then
+                winningPlayer = 1
+                gameState = 'done'
+            else
+                gameState = 'serve'
+            ball:reset()
+            end
+        end
     end
-
-    --player 1 paddle movement
-    if love.keyboard.isDown('w') then
-        -- negative paddle speed because Y up is negative
-        player1.dy = -PADDLE_SPEED
-        -- positive paddle speed because Y down is positive
-    elseif love.keyboard.isDown('s') then 
-        player1.dy = PADDLE_SPEED
-    else
-       player1.dy = 0
-    end 
+        --player 1 paddle movement
+        if love.keyboard.isDown('w') then
+            -- negative paddle speed because Y up is negative
+            player1.dy = -PADDLE_SPEED
+            -- positive paddle speed because Y down is positive
+        elseif love.keyboard.isDown('s') then 
+            player1.dy = PADDLE_SPEED
+        else
+            player1.dy = 0
+        end 
 
     --player 2 paddle movement
     if love.keyboard.isDown('up') then
@@ -135,12 +145,25 @@ end
 function love.keypressed(key)
     if key == 'escape' then 
         love.event.quit()
+    
     elseif key == 'enter' or key == 'return' then
         if gameState == 'start' then
+            gameState = 'serve'
+        
+        elseif gameState == 'serve' then
             gameState = 'play'
-        else
-            gameState = 'start'
+
+        elseif gameState == 'done' then
+            gameState = 'serve'
             ball:reset()
+            player1Score = 0
+            player2Score = 0
+
+            if winningPlayer == 1 then
+                servingPlayer = 2
+            else
+                servingPlayer = 1
+            end
         end
     end
 end
@@ -151,30 +174,40 @@ function love.draw()
     love.graphics.clear(40/255, 45/255, 52/255, 255/255)
 
     love.graphics.setFont(smallFont)
+
+    displayScore()
     
     if gameState == 'start' then
+        love.graphics.setFont(smallFont)
         love.graphics.printf('Pongus', 0, 10, VIRTUAL_WIDTH, 'center')
         love.graphics.printf('Press Enter to start', 0, 20, VIRTUAL_WIDTH, 'center')
     elseif gameState == 'serve' then
         love.graphics.setFont(smallFont)
         love.graphics.printf('Player ' .. tostring(servingPlayer) .. "'s serve!", 0, 10, VIRTUAL_WIDTH, 'center')
         
-    else
-        love.graphics.printf('Play Pong!', 0, 20, VIRTUAL_WIDTH, 'center' )
+    elseif gameState == 'play' then
+        love.graphics.setFont(smallFont)
+        love.graphics.printf('Play Pongus!', 0, 20, VIRTUAL_WIDTH, 'center' )
+    elseif gameState == 'done' then
+        love.graphics.setFont(largeFont)
+        love.graphics.printf('Player ' .. tostring(winningPlayer) .. ' wins!',
+            0, 10, VIRTUAL_WIDTH, 'center')
+        love.graphics.setFont(smallFont)
+        love.graphics.printf('Press Enter to restart!', 0, 30, VIRTUAL_WIDTH, 'center')
     end
     
-    love.graphics.setFont(scoreFont)
-
-    love.graphics.print(tostring(player1Score), VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 3)
-    love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30, VIRTUAL_HEIGHT / 3)
+    --love.graphics.setFont(scoreFont)
+    
+    --love.graphics.print(tostring(player1Score), VIRTUAL_WIDTH / 2 - 50, VIRTUAL_HEIGHT / 3)
+    --love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30, VIRTUAL_HEIGHT / 3)
     
     --left paddle
     player1:render()
     --right paddle
     player2:render()
-    --rendering ball using the class' method
+    --rendering ball using the class's method
     ball:render()
-
+    
     showFPS()
     
     push:apply('end')
