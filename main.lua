@@ -14,6 +14,8 @@ PADDLE_SPEED = 500
 
 function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
+
+    love.window.setTitle('Pongus')
     
     math.randomseed(os.time())
 
@@ -106,6 +108,14 @@ function love.draw()
     player2:render()
     --rendering ball using the class' method
     ball:render()
+
+    showFPS()
     
     push:apply('end')
 end
+
+    function showFPS()
+        love.graphics.setFont(smallFont)
+        love.graphics.setColor(0, 255, 0, 255)
+        love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 10, 10)
+    end
